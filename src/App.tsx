@@ -545,6 +545,7 @@ function App() {
   const [isLightDragging, setIsLightDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [rotationStart, setRotationStart] = useState({ x: 0, y: 0 })
+  const dragIntentRef = useRef<'none' | 'pan' | 'rotate'>('none')
 
   // Enhanced event handlers for both mouse and touch
   const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
@@ -560,34 +561,42 @@ function App() {
       
       setDragStart({ x: clientX, y: clientY })
       setRotationStart({ x: rotationY, y: rotationX })
-      
-      // Prevent default touch behavior only for canvas
-      if ('touches' in e) {
-        e.preventDefault()
-      }
+      dragIntentRef.current = 'none' // Reset intent
     }
   }
 
   const handleMove = (e: React.MouseEvent | React.TouchEvent) => {
-    if (isDragging && !isLightDragging) {
-      // Handle both mouse and touch events
-      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
-      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
-      
-      const deltaX = clientX - dragStart.x
-      const deltaY = clientY - dragStart.y
-      setRotationY(rotationStart.x + deltaX * 0.01)
-      setRotationX(rotationStart.y + deltaY * 0.01)
-      
-      // Prevent default touch behavior only when dragging
+    if (!isDragging || isLightDragging) return
+
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+    
+    const deltaX = clientX - dragStart.x
+    const deltaY = clientY - dragStart.y
+
+    if (dragIntentRef.current === 'none') {
+      // Decide intent on the first move
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        dragIntentRef.current = 'rotate'
+      } else {
+        dragIntentRef.current = 'pan'
+      }
+    }
+
+    if (dragIntentRef.current === 'rotate') {
+      // Prevent page scroll if we're rotating
       if ('touches' in e) {
         e.preventDefault()
       }
+      setRotationY(rotationStart.x + deltaX * 0.01)
+      setRotationX(rotationStart.y + deltaY * 0.01)
     }
+    // If intent is 'pan', do nothing and let the browser handle scrolling
   }
 
   const handleEnd = () => {
     setIsDragging(false)
+    dragIntentRef.current = 'none' // Reset intent
   }
 
   const environmentOptions = [

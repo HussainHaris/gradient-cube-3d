@@ -3,17 +3,16 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Mobile touch optimizations - allow full scrolling and zooming */
-body {
+html, body {
+  width: 100%;
   margin: 0;
   padding: 0;
-  /* Removed overflow-x: hidden to allow horizontal scrolling */
-}
-
-html {
-  /* Removed overflow-x: hidden to allow horizontal scrolling */
+  /* Removed overflow-x: hidden to allow user-initiated horizontal scroll on zoom */
 }
 
 /* Allow text selection for inputs and labels */
@@ -69,17 +68,14 @@ input, label, select, button {
   padding: 2rem 1rem;
   width: 100%;
   box-sizing: border-box;
-  /* Ensure proper centering on mobile */
 }
 
 .canvas-wrapper {
-  /* Only apply touch restrictions to the canvas area */
-  touch-action: none;
+  touch-action: pan-y;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
   margin-bottom: 2rem;
-  /* Ensure canvas is centered */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -132,7 +128,6 @@ input, label, select, button {
   max-width: 1200px;
   padding: 0 1rem;
   box-sizing: border-box;
-  /* Allow normal scrolling in controls area */
   touch-action: auto;
 }
 
@@ -245,27 +240,21 @@ input, label, select, button {
 @media (max-width: 768px) {
   #root {
     padding: 0.5rem;
-    width: 100%;
-    max-width: 100vw;
+    max-width: 100%;
   }
   
   .cube-container {
     min-height: 100vh;
     padding: 1rem 0.5rem;
     justify-content: flex-start;
-    align-items: center;
   }
   
   .canvas-wrapper {
     margin-bottom: 1rem;
     width: 100%;
-    max-width: 100vw;
-    /* Ensure canvas doesn't overflow */
   }
   
   .canvas-wrapper canvas {
-    max-width: 100vw !important;
-    height: auto !important;
     width: min(600px, 95vw) !important;
     aspect-ratio: 1 !important;
   }
@@ -288,14 +277,6 @@ input, label, select, button {
   
   .controls {
     width: 100%;
-    max-width: 100vw;
     padding: 0 0.5rem;
-  }
-}
-
-/* Allow canvas interaction while enabling page scrolling */
-@media (max-width: 768px) {
-  .canvas-wrapper canvas {
-    touch-action: pan-y pinch-zoom !important;
   }
 }
