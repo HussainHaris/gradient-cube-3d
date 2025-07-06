@@ -7,7 +7,7 @@ import './App.css'
 function SubCube({ 
   position, rotation, colorA, colorB, colorC, cornerRadius, size, 
   diffusionType, gradientSharpness, gradientOffset, gradientRotation,
-  cubeType // 'gradient', 'opposite', 'glass', 'silver'
+  cubeType // 'gradient', 'opposite', 'glass', 'silver', 'opposite-transparent'
 }: { 
   position: [number, number, number],
   rotation: [number, number, number], 
@@ -20,7 +20,7 @@ function SubCube({
   gradientSharpness: number,
   gradientOffset: number,
   gradientRotation: number,
-  cubeType: 'gradient' | 'opposite' | 'glass' | 'silver'
+  cubeType: 'gradient' | 'opposite' | 'glass' | 'silver' | 'opposite-transparent'
 }) {
   const meshRef = useRef<THREE.Mesh>(null)
   const materialRef = useRef<THREE.MeshPhysicalMaterial>(null)
@@ -49,11 +49,11 @@ function SubCube({
       finalColorA = '#f0f0f0' // Very light silver
       finalColorB = '#c0c0c0' // Medium silver
       finalColorC = '#808080' // Darker silver (but not too dark)
-    } else if (cubeType === 'opposite') {
+    } else if (cubeType === 'opposite' || cubeType === 'opposite-transparent') {
       finalColorA = oppositeColorA
       finalColorB = oppositeColorB
       finalColorC = oppositeColorC
-    } else {
+    } else { // 'gradient'
       finalColorA = colorA
       finalColorB = colorB
       finalColorC = colorC
@@ -191,11 +191,11 @@ function SubCube({
         finalColorA = '#f0f0f0'
         finalColorB = '#c0c0c0'
         finalColorC = '#808080'
-      } else if (cubeType === 'opposite') {
+      } else if (cubeType === 'opposite' || cubeType === 'opposite-transparent') {
         finalColorA = oppositeColorA
         finalColorB = oppositeColorB
         finalColorC = oppositeColorC
-      } else {
+      } else { // 'gradient'
         finalColorA = colorA
         finalColorB = colorB
         finalColorC = colorC
@@ -213,6 +213,8 @@ function SubCube({
 
   const subCubeSize = size / 2
 
+  const isTransparent = cubeType === 'glass' || cubeType === 'opposite-transparent';
+
   return (
     <RoundedBox 
       ref={meshRef} 
@@ -224,13 +226,13 @@ function SubCube({
     >
       <meshPhysicalMaterial 
         ref={materialRef}
-        metalness={cubeType === 'glass' ? 0.1 : cubeType === 'silver' ? 0.95 : 0.3}
-        roughness={cubeType === 'glass' ? 0.05 : cubeType === 'silver' ? 0.01 : 0.1}
+        metalness={cubeType === 'silver' ? 0.95 : (isTransparent ? 0.1 : 0.3)}
+        roughness={cubeType === 'silver' ? 0.01 : (isTransparent ? 0.05 : 0.1)}
         clearcoat={1}
         clearcoatRoughness={0.05}
-        envMapIntensity={cubeType === 'glass' ? 3 : cubeType === 'silver' ? 2.5 : 1.5}
-        transparent={cubeType === 'glass'}
-        opacity={cubeType === 'glass' ? 0.3 : 1}
+        envMapIntensity={cubeType === 'silver' ? 2.5 : (isTransparent ? 3 : 1.5)}
+        transparent={isTransparent}
+        opacity={isTransparent ? 0.3 : 1}
         onBeforeCompile={cubeType !== 'glass' ? onBeforeCompile : undefined}
       />
     </RoundedBox>
@@ -266,16 +268,16 @@ function CubeCluster({
     [size/4, size/4, size/4],    // 7: front-top-right
   ]
   
-  // Define cube types: 25% glass, 25% silver, 25% gradient, 25% opposite (non-adjacent)
-  const cubeTypes: ('gradient' | 'opposite' | 'glass' | 'silver')[] = [
-    'glass',    // 0
-    'gradient', // 1
-    'opposite', // 2 (non-adjacent to 1)
-    'silver',   // 3
-    'silver',   // 4
-    'glass',    // 5
-    'gradient', // 6 (non-adjacent to 2)
-    'opposite'  // 7 (non-adjacent to 1 and 2)
+  // Define cube types with new distribution
+  const cubeTypes: ('gradient' | 'opposite' | 'glass' | 'silver' | 'opposite-transparent')[] = [
+    'gradient',             // 0: Was 'glass'
+    'gradient',             // 1: No change
+    'opposite-transparent', // 2: Was 'opposite'
+    'silver',               // 3: No change
+    'silver',               // 4: No change
+    'glass',                // 5: No change
+    'gradient',             // 6: No change
+    'opposite'              // 7: No change
   ]
 
   return (
@@ -526,10 +528,10 @@ function App() {
   const [rotationY, setRotationY] = useState(0)
   const [colorA, setColorA] = useState('#dc2626') // Changed to solid red
   const [colorB, setColorB] = useState('#7ee8fa')
-  const [colorC, setColorC] = useState('#eec0ff')
+  const [colorC, setColorC] = useState('#1e3a8a') // Changed to dark blue
   const [bgColorA, setBgColorA] = useState('#dc2626') // Changed to solid red
   const [bgColorB, setBgColorB] = useState('#7ee8fa')
-  const [bgColorC, setBgColorC] = useState('#eec0ff')
+  const [bgColorC, setBgColorC] = useState('#1e3a8a') // Changed to dark blue
   const [lightPosition, setLightPosition] = useState<[number, number, number]>([5, 5, 8])
   const [cornerRadius, setCornerRadius] = useState(0.1)
   const [size, setSize] = useState(6)
