@@ -4,8 +4,6 @@ import { Environment, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 import './App.css'
 
-
-
 function SubCube({ 
   position, rotation, colorA, colorB, colorC, cornerRadius, size, 
   diffusionType, gradientSharpness, gradientOffset, gradientRotation,
@@ -47,10 +45,10 @@ function SubCube({
     let finalColorA, finalColorB, finalColorC
     
     if (cubeType === 'silver') {
-      // Silver gradient colors
-      finalColorA = '#c0c0c0' // Light silver
-      finalColorB = '#808080' // Medium silver
-      finalColorC = '#404040' // Dark silver
+      // Brighter silver gradient colors
+      finalColorA = '#f0f0f0' // Very light silver
+      finalColorB = '#c0c0c0' // Medium silver
+      finalColorC = '#808080' // Darker silver (but not too dark)
     } else if (cubeType === 'opposite') {
       finalColorA = oppositeColorA
       finalColorB = oppositeColorB
@@ -190,9 +188,9 @@ function SubCube({
       let finalColorA, finalColorB, finalColorC
       
       if (cubeType === 'silver') {
-        finalColorA = '#c0c0c0'
-        finalColorB = '#808080'
-        finalColorC = '#404040'
+        finalColorA = '#f0f0f0'
+        finalColorB = '#c0c0c0'
+        finalColorC = '#808080'
       } else if (cubeType === 'opposite') {
         finalColorA = oppositeColorA
         finalColorB = oppositeColorB
@@ -226,11 +224,11 @@ function SubCube({
     >
       <meshPhysicalMaterial 
         ref={materialRef}
-        metalness={cubeType === 'glass' ? 0.1 : cubeType === 'silver' ? 0.9 : 0.3}
-        roughness={cubeType === 'glass' ? 0.05 : cubeType === 'silver' ? 0.02 : 0.1}
+        metalness={cubeType === 'glass' ? 0.1 : cubeType === 'silver' ? 0.95 : 0.3}
+        roughness={cubeType === 'glass' ? 0.05 : cubeType === 'silver' ? 0.01 : 0.1}
         clearcoat={1}
         clearcoatRoughness={0.05}
-        envMapIntensity={cubeType === 'glass' ? 3 : cubeType === 'silver' ? 2 : 1.5}
+        envMapIntensity={cubeType === 'glass' ? 3 : cubeType === 'silver' ? 2.5 : 1.5}
         transparent={cubeType === 'glass'}
         opacity={cubeType === 'glass' ? 0.3 : 1}
         onBeforeCompile={cubeType !== 'glass' ? onBeforeCompile : undefined}
@@ -304,34 +302,43 @@ function CubeCluster({
 }
 
 function GridBackground({ gridSize }: { gridSize: number }) {
-  const { viewport } = useThree()
+  const { viewport, camera } = useThree()
   const gridRef = useRef<THREE.LineSegments>(null)
   
   const gridGeometry = useMemo(() => {
     const geometry = new THREE.BufferGeometry()
     const vertices = []
     
-    // Calculate grid bounds based on viewport
-    const width = viewport.width * 2
-    const height = viewport.height * 2
+    // Make grid much larger and based on camera distance
+    const distance = camera.position.length()
+    const scale = Math.max(distance * 0.5, 20) // Minimum size of 20
+    const width = viewport.width * scale
+    const height = viewport.height * scale
     const halfWidth = width / 2
     const halfHeight = height / 2
     
+    // Create more grid lines for infinite appearance
+    const step = gridSize
+    const numLinesX = Math.ceil(width / step) + 10
+    const numLinesY = Math.ceil(height / step) + 10
+    
     // Vertical lines
-    for (let x = -halfWidth; x <= halfWidth; x += gridSize) {
-      vertices.push(x, -halfHeight, -5)
-      vertices.push(x, halfHeight, -5)
+    for (let i = -numLinesX; i <= numLinesX; i++) {
+      const x = i * step
+      vertices.push(x, -halfHeight, -10)
+      vertices.push(x, halfHeight, -10)
     }
     
     // Horizontal lines
-    for (let y = -halfHeight; y <= halfHeight; y += gridSize) {
-      vertices.push(-halfWidth, y, -5)
-      vertices.push(halfWidth, y, -5)
+    for (let i = -numLinesY; i <= numLinesY; i++) {
+      const y = i * step
+      vertices.push(-halfWidth, y, -10)
+      vertices.push(halfWidth, y, -10)
     }
     
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3))
     return geometry
-  }, [gridSize, viewport.width, viewport.height])
+  }, [gridSize, viewport.width, viewport.height, camera.position])
   
   return (
     <lineSegments ref={gridRef} geometry={gridGeometry}>
@@ -539,16 +546,17 @@ function App() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [rotationStart, setRotationStart] = useState({ x: 0, y: 0 })
 
-  // Generate stylistic background gradient
+  // Generate expanding background gradient
   const backgroundStyle = {
     background: `
-      radial-gradient(ellipse at top left, ${bgColorA}40 0%, transparent 50%),
-      radial-gradient(ellipse at top right, ${bgColorB}40 0%, transparent 50%),
-      radial-gradient(ellipse at bottom left, ${bgColorB}40 0%, transparent 50%),
-      radial-gradient(ellipse at bottom right, ${bgColorC}40 0%, transparent 50%),
+      radial-gradient(ellipse 150% 150% at top left, ${bgColorA}40 0%, transparent 70%),
+      radial-gradient(ellipse 150% 150% at top right, ${bgColorB}40 0%, transparent 70%),
+      radial-gradient(ellipse 150% 150% at bottom left, ${bgColorB}40 0%, transparent 70%),
+      radial-gradient(ellipse 150% 150% at bottom right, ${bgColorC}40 0%, transparent 70%),
+      radial-gradient(ellipse 200% 200% at center, ${bgColorA}15 0%, ${bgColorB}15 40%, ${bgColorC}15 100%),
       linear-gradient(135deg, ${bgColorA}20 0%, ${bgColorB}20 50%, ${bgColorC}20 100%)
     `,
-    minHeight: '100vh',
+    minHeight: '200vh',
     width: '100%',
     position: 'fixed' as const,
     top: 0,
@@ -556,26 +564,47 @@ function App() {
     zIndex: -1
   }
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  // Enhanced event handlers for both mouse and touch
+  const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
     if (isLightDragging) return
+    
     const target = e.target as HTMLElement
     if (target.tagName === 'CANVAS') {
       setIsDragging(true)
-      setDragStart({ x: e.clientX, y: e.clientY })
+      
+      // Handle both mouse and touch events
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+      
+      setDragStart({ x: clientX, y: clientY })
       setRotationStart({ x: rotationY, y: rotationX })
+      
+      // Prevent default touch behavior
+      if ('touches' in e) {
+        e.preventDefault()
+      }
     }
   }
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (isDragging && !isLightDragging) {
-      const deltaX = e.clientX - dragStart.x
-      const deltaY = e.clientY - dragStart.y
+      // Handle both mouse and touch events
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+      
+      const deltaX = clientX - dragStart.x
+      const deltaY = clientY - dragStart.y
       setRotationY(rotationStart.x + deltaX * 0.01)
       setRotationX(rotationStart.y + deltaY * 0.01)
+      
+      // Prevent default touch behavior
+      if ('touches' in e) {
+        e.preventDefault()
+      }
     }
   }
 
-  const handleMouseUp = () => {
+  const handleEnd = () => {
     setIsDragging(false)
   }
 
@@ -598,10 +627,14 @@ function App() {
       <div style={backgroundStyle} />
       <div 
         className="cube-container"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseDown={handleStart}
+        onMouseMove={handleMove}
+        onMouseUp={handleEnd}
+        onMouseLeave={handleEnd}
+        onTouchStart={handleStart}
+        onTouchMove={handleMove}
+        onTouchEnd={handleEnd}
+        style={{ touchAction: 'none' }} // Prevent default touch behaviors
       >
         <Canvas 
           style={{ height: 600, width: 600, cursor: isDragging ? 'grabbing' : 'grab' }} 
