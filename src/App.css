@@ -5,14 +5,16 @@
   text-align: center;
 }
 
-/* Mobile touch optimizations */
-* {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+/* Mobile touch optimizations - allow scrolling */
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  /* Removed touch-action: manipulation to allow scrolling */
+}
+
+html {
+  overflow-x: hidden;
 }
 
 /* Allow text selection for inputs and labels */
@@ -21,17 +23,6 @@ input, label, select, button {
   -moz-user-select: auto;
   -ms-user-select: auto;
   user-select: auto;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  touch-action: manipulation;
-}
-
-html {
-  overflow-x: hidden;
 }
 
 .logo {
@@ -74,12 +65,19 @@ html {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: 100vh;
+  padding: 2rem 0;
+  /* Removed touch-action: none to allow scrolling */
+}
+
+.canvas-wrapper {
+  /* Only apply touch restrictions to the canvas area */
   touch-action: none;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
+  margin-bottom: 2rem;
 }
 
 .sliders {
@@ -128,6 +126,8 @@ html {
   width: 100%;
   padding: 0 1rem;
   box-sizing: border-box;
+  /* Allow normal scrolling in controls area */
+  touch-action: auto;
 }
 
 .light-controls {
@@ -243,7 +243,11 @@ html {
   
   .cube-container {
     min-height: 100vh;
-    padding: 0;
+    padding: 1rem 0;
+  }
+  
+  .canvas-wrapper {
+    margin-bottom: 1rem;
   }
   
   .color-pickers {
@@ -262,9 +266,9 @@ html {
   }
 }
 
-/* Prevent zoom on double tap */
+/* Only prevent zoom on canvas, not the whole page */
 @media (max-width: 768px) {
-  canvas {
+  .canvas-wrapper canvas {
     touch-action: none !important;
   }
 }

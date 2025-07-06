@@ -524,18 +524,18 @@ function Scene({
 function App() {
   const [rotationX, setRotationX] = useState(0)
   const [rotationY, setRotationY] = useState(0)
-  const [colorA, setColorA] = useState('#ff6ec7')
+  const [colorA, setColorA] = useState('#dc2626') // Changed to solid red
   const [colorB, setColorB] = useState('#7ee8fa')
   const [colorC, setColorC] = useState('#eec0ff')
-  const [bgColorA, setBgColorA] = useState('#ff6ec7')
+  const [bgColorA, setBgColorA] = useState('#dc2626') // Changed to solid red
   const [bgColorB, setBgColorB] = useState('#7ee8fa')
   const [bgColorC, setBgColorC] = useState('#eec0ff')
   const [lightPosition, setLightPosition] = useState<[number, number, number]>([5, 5, 8])
   const [cornerRadius, setCornerRadius] = useState(0.1)
   const [size, setSize] = useState(6)
-  const [brightness, setBrightness] = useState(1.5)
-  const [lightMode, setLightMode] = useState<'single' | 'quad'>('single')
-  const [environment, setEnvironment] = useState<string | null>('city')
+  const [brightness, setBrightness] = useState(3) // Changed to max brightness
+  const [lightMode, setLightMode] = useState<'single' | 'quad'>('quad') // Changed to quad
+  const [environment, setEnvironment] = useState<string | null>('studio') // Changed to studio
   const [diffusionType, setDiffusionType] = useState<'smooth' | 'radial' | 'sharp'>('smooth')
   const [gradientSharpness, setGradientSharpness] = useState(1)
   const [gradientOffset, setGradientOffset] = useState(0)
@@ -561,7 +561,7 @@ function App() {
       setDragStart({ x: clientX, y: clientY })
       setRotationStart({ x: rotationY, y: rotationX })
       
-      // Prevent default touch behavior
+      // Prevent default touch behavior only for canvas
       if ('touches' in e) {
         e.preventDefault()
       }
@@ -579,7 +579,7 @@ function App() {
       setRotationY(rotationStart.x + deltaX * 0.01)
       setRotationX(rotationStart.y + deltaY * 0.01)
       
-      // Prevent default touch behavior
+      // Prevent default touch behavior only when dragging
       if ('touches' in e) {
         e.preventDefault()
       }
@@ -626,56 +626,71 @@ function App() {
           overflow: 'hidden'
         }}
       />
-      <div 
-        className="cube-container"
-        onMouseDown={handleStart}
-        onMouseMove={handleMove}
-        onMouseUp={handleEnd}
-        onMouseLeave={handleEnd}
-        onTouchStart={handleStart}
-        onTouchMove={handleMove}
-        onTouchEnd={handleEnd}
-        style={{ 
-          touchAction: 'none',
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          WebkitTouchCallout: 'none'
-        }}
-      >
-        <Canvas 
-          style={{ 
-            height: 600, 
-            width: 600, 
-            cursor: isDragging ? 'grabbing' : 'grab',
-            touchAction: 'none'
-          }} 
-          camera={{ position: [0, 0, 15] }}
-          shadows
-          gl={{ preserveDrawingBuffer: true }}
+      <div className="cube-container">
+        <div 
+          className="canvas-wrapper"
+          onMouseDown={handleStart}
+          onMouseMove={handleMove}
+          onMouseUp={handleEnd}
+          onMouseLeave={handleEnd}
+          onTouchStart={handleStart}
+          onTouchMove={handleMove}
+          onTouchEnd={handleEnd}
         >
-          <Scene 
-            rotationX={rotationX}
-            rotationY={rotationY}
-            colorA={colorA}
-            colorB={colorB}
-            colorC={colorC}
-            cornerRadius={cornerRadius}
-            lightPosition={lightPosition}
-            setLightPosition={setLightPosition}
-            size={size}
-            brightness={brightness}
-            lightMode={lightMode}
-            environment={environment}
-            diffusionType={diffusionType}
-            gradientSharpness={gradientSharpness}
-            gradientOffset={gradientOffset}
-            gradientRotation={gradientRotation}
-            gridSize={gridSize}
-            onLightDragStart={() => setIsLightDragging(true)}
-            onLightDragEnd={() => setIsLightDragging(false)}
-          />
-        </Canvas>
+          <Canvas 
+            style={{ 
+              height: 600, 
+              width: 600, 
+              cursor: isDragging ? 'grabbing' : 'grab'
+            }} 
+            camera={{ position: [0, 0, 15] }}
+            shadows
+            gl={{ preserveDrawingBuffer: true }}
+          >
+            <Scene 
+              rotationX={rotationX}
+              rotationY={rotationY}
+              colorA={colorA}
+              colorB={colorB}
+              colorC={colorC}
+              cornerRadius={cornerRadius}
+              lightPosition={lightPosition}
+              setLightPosition={setLightPosition}
+              size={size}
+              brightness={brightness}
+              lightMode={lightMode}
+              environment={environment}
+              diffusionType={diffusionType}
+              gradientSharpness={gradientSharpness}
+              gradientOffset={gradientOffset}
+              gradientRotation={gradientRotation}
+              gridSize={gridSize}
+              onLightDragStart={() => setIsLightDragging(true)}
+              onLightDragEnd={() => setIsLightDragging(false)}
+            />
+          </Canvas>
+        </div>
+        
         <div className="controls">
+          {/* Moved cube colors to the top */}
+          <div className="color-section">
+            <h3>Cube Colors</h3>
+            <div className="color-pickers">
+              <label>
+                Color A
+                <input type="color" value={colorA} onChange={e => setColorA(e.target.value)} />
+              </label>
+              <label>
+                Color B
+                <input type="color" value={colorB} onChange={e => setColorB(e.target.value)} />
+              </label>
+              <label>
+                Color C
+                <input type="color" value={colorC} onChange={e => setColorC(e.target.value)} />
+              </label>
+            </div>
+          </div>
+
           <div className="sliders">
             <label>
               Cube Size
@@ -787,23 +802,6 @@ function App() {
                 onChange={e => setBrightness(Number(e.target.value))}
               />
             </label>
-          </div>
-          <div className="color-section">
-            <h3>Cube Colors</h3>
-            <div className="color-pickers">
-              <label>
-                Color A
-                <input type="color" value={colorA} onChange={e => setColorA(e.target.value)} />
-              </label>
-              <label>
-                Color B
-                <input type="color" value={colorB} onChange={e => setColorB(e.target.value)} />
-              </label>
-              <label>
-                Color C
-                <input type="color" value={colorC} onChange={e => setColorC(e.target.value)} />
-              </label>
-            </div>
           </div>
           <div className="color-section">
             <h3>Background Colors</h3>
