@@ -648,11 +648,11 @@ function App() {
         >
           <Canvas 
             style={{ 
-              height: 'min(600px, 95vw)', 
-              width: 'min(600px, 95vw)', 
+              height: 'auto', 
+              width: '100%', 
+              aspectRatio: '1',
               cursor: isDragging ? 'grabbing' : 'grab',
-              maxWidth: '100%',
-              maxHeight: '100%'
+              maxWidth: '600px'
             }} 
             camera={{ position: [0, 0, 15] }}
             shadows

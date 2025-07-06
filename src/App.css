@@ -7,12 +7,16 @@
   box-sizing: border-box;
 }
 
-/* Mobile touch optimizations - allow full scrolling and zooming */
+/* Fix for mobile overflow and centering */
+* {
+  box-sizing: border-box;
+}
+
 html, body {
   width: 100%;
+  overflow-x: hidden; /* Prevents horizontal scrollbar from layout overflow */
   margin: 0;
   padding: 0;
-  /* Removed overflow-x: hidden to allow user-initiated horizontal scroll on zoom */
 }
 
 /* Allow text selection for inputs and labels */
@@ -67,7 +71,6 @@ input, label, select, button {
   min-height: 100vh;
   padding: 2rem 1rem;
   width: 100%;
-  box-sizing: border-box;
 }
 
 .canvas-wrapper {
@@ -86,7 +89,7 @@ input, label, select, button {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: min(400px, 90vw);
+  width: min(400px, 100%);
 }
 
 .sliders label {
@@ -127,7 +130,6 @@ input, label, select, button {
   width: 100%;
   max-width: 1200px;
   padding: 0 1rem;
-  box-sizing: border-box;
   touch-action: auto;
 }
 
@@ -135,7 +137,7 @@ input, label, select, button {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: min(400px, 90vw);
+  width: min(400px, 100%);
 }
 
 .light-controls label {
@@ -177,8 +179,7 @@ input, label, select, button {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   backdrop-filter: blur(10px);
-  width: min(400px, 90vw);
-  box-sizing: border-box;
+  width: min(400px, 100%);
 }
 
 .color-section h3 {
@@ -198,13 +199,12 @@ input, label, select, button {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: min(400px, 90vw);
+  width: min(400px, 100%);
   margin-top: 2rem;
   padding: 1rem;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   backdrop-filter: blur(10px);
-  box-sizing: border-box;
 }
 
 .gradient-controls label {
@@ -239,7 +239,7 @@ input, label, select, button {
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
   #root {
-    padding: 0.5rem;
+    padding: 0 1rem; /* Add horizontal padding */
     max-width: 100%;
   }
   
@@ -255,7 +255,8 @@ input, label, select, button {
   }
   
   .canvas-wrapper canvas {
-    width: min(600px, 95vw) !important;
+    width: 95vw !important;
+    max-width: 600px !important;
     aspect-ratio: 1 !important;
   }
   
@@ -264,7 +265,8 @@ input, label, select, button {
   }
   
   .sliders, .light-controls, .gradient-controls, .color-section {
-    width: min(400px, 95vw);
+    width: 100%;
+    max-width: 400px;
     margin-left: auto;
     margin-right: auto;
   }
