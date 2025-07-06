@@ -311,7 +311,7 @@ function GridBackground({ gridSize }: { gridSize: number }) {
     
     // Make grid much larger and based on camera distance
     const distance = camera.position.length()
-    const scale = Math.max(distance * 0.5, 20) // Minimum size of 20
+    const scale = Math.max(distance * 0.8, 50) // Increased minimum size and scale
     const width = viewport.width * scale
     const height = viewport.height * scale
     const halfWidth = width / 2
@@ -319,8 +319,8 @@ function GridBackground({ gridSize }: { gridSize: number }) {
     
     // Create more grid lines for infinite appearance
     const step = gridSize
-    const numLinesX = Math.ceil(width / step) + 10
-    const numLinesY = Math.ceil(height / step) + 10
+    const numLinesX = Math.ceil(width / step) + 20 // More lines
+    const numLinesY = Math.ceil(height / step) + 20 // More lines
     
     // Vertical lines
     for (let i = -numLinesX; i <= numLinesX; i++) {
@@ -546,24 +546,6 @@ function App() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [rotationStart, setRotationStart] = useState({ x: 0, y: 0 })
 
-  // Generate expanding background gradient
-  const backgroundStyle = {
-    background: `
-      radial-gradient(ellipse 150% 150% at top left, ${bgColorA}40 0%, transparent 70%),
-      radial-gradient(ellipse 150% 150% at top right, ${bgColorB}40 0%, transparent 70%),
-      radial-gradient(ellipse 150% 150% at bottom left, ${bgColorB}40 0%, transparent 70%),
-      radial-gradient(ellipse 150% 150% at bottom right, ${bgColorC}40 0%, transparent 70%),
-      radial-gradient(ellipse 200% 200% at center, ${bgColorA}15 0%, ${bgColorB}15 40%, ${bgColorC}15 100%),
-      linear-gradient(135deg, ${bgColorA}20 0%, ${bgColorB}20 50%, ${bgColorC}20 100%)
-    `,
-    minHeight: '200vh',
-    width: '100%',
-    position: 'fixed' as const,
-    top: 0,
-    left: 0,
-    zIndex: -1
-  }
-
   // Enhanced event handlers for both mouse and touch
   const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
     if (isLightDragging) return
@@ -624,7 +606,26 @@ function App() {
 
   return (
     <>
-      <div style={backgroundStyle} />
+      {/* Fixed infinite background using CSS */}
+      <div 
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: `
+            radial-gradient(ellipse 200% 200% at 20% 20%, ${bgColorA}40 0%, transparent 60%),
+            radial-gradient(ellipse 200% 200% at 80% 20%, ${bgColorB}40 0%, transparent 60%),
+            radial-gradient(ellipse 200% 200% at 20% 80%, ${bgColorB}40 0%, transparent 60%),
+            radial-gradient(ellipse 200% 200% at 80% 80%, ${bgColorC}40 0%, transparent 60%),
+            radial-gradient(ellipse 300% 300% at 50% 50%, ${bgColorA}15 0%, ${bgColorB}15 40%, ${bgColorC}15 100%),
+            linear-gradient(135deg, ${bgColorA}20 0%, ${bgColorB}20 50%, ${bgColorC}20 100%)
+          `,
+          zIndex: -1,
+          overflow: 'hidden'
+        }}
+      />
       <div 
         className="cube-container"
         onMouseDown={handleStart}
@@ -634,12 +635,23 @@ function App() {
         onTouchStart={handleStart}
         onTouchMove={handleMove}
         onTouchEnd={handleEnd}
-        style={{ touchAction: 'none' }} // Prevent default touch behaviors
+        style={{ 
+          touchAction: 'none',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          WebkitTouchCallout: 'none'
+        }}
       >
         <Canvas 
-          style={{ height: 600, width: 600, cursor: isDragging ? 'grabbing' : 'grab' }} 
+          style={{ 
+            height: 600, 
+            width: 600, 
+            cursor: isDragging ? 'grabbing' : 'grab',
+            touchAction: 'none'
+          }} 
           camera={{ position: [0, 0, 15] }}
           shadows
+          gl={{ preserveDrawingBuffer: true }}
         >
           <Scene 
             rotationX={rotationX}

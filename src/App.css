@@ -5,6 +5,35 @@
   text-align: center;
 }
 
+/* Mobile touch optimizations */
+* {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection for inputs and labels */
+input, label, select, button {
+  -webkit-user-select: auto;
+  -moz-user-select: auto;
+  -ms-user-select: auto;
+  user-select: auto;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  touch-action: manipulation;
+}
+
+html {
+  overflow-x: hidden;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -47,6 +76,10 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .sliders {
@@ -54,7 +87,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 400px;
+  width: min(400px, 90vw);
 }
 
 .sliders label {
@@ -67,6 +100,7 @@
 .sliders input[type="range"] {
   width: 100%;
   margin-top: 0.5rem;
+  touch-action: manipulation;
 }
 
 .color-pickers {
@@ -75,6 +109,7 @@
   flex-direction: row;
   gap: 2rem;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .color-pickers label {
@@ -90,13 +125,16 @@
   flex-direction: column;
   align-items: center;
   gap: 1rem;
+  width: 100%;
+  padding: 0 1rem;
+  box-sizing: border-box;
 }
 
 .light-controls {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 400px;
+  width: min(400px, 90vw);
 }
 
 .light-controls label {
@@ -109,6 +147,7 @@
 .light-controls input[type="range"] {
   width: 100%;
   margin-top: 0.5rem;
+  touch-action: manipulation;
 }
 
 .light-controls select {
@@ -120,6 +159,7 @@
   border: 1px solid #ccc;
   background: white;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -136,6 +176,8 @@
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   backdrop-filter: blur(10px);
+  width: min(400px, 90vw);
+  box-sizing: border-box;
 }
 
 .color-section h3 {
@@ -155,12 +197,13 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 400px;
+  width: min(400px, 90vw);
   margin-top: 2rem;
   padding: 1rem;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   backdrop-filter: blur(10px);
+  box-sizing: border-box;
 }
 
 .gradient-controls label {
@@ -174,6 +217,7 @@
 .gradient-controls input[type="range"] {
   width: 100%;
   margin-top: 0.5rem;
+  touch-action: manipulation;
 }
 
 .gradient-controls .value {
@@ -188,5 +232,39 @@
 @media (prefers-color-scheme: dark) {
   .gradient-controls .value {
     color: #aaa;
+  }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  #root {
+    padding: 1rem;
+  }
+  
+  .cube-container {
+    min-height: 100vh;
+    padding: 0;
+  }
+  
+  .color-pickers {
+    gap: 1rem;
+  }
+  
+  .sliders, .light-controls, .gradient-controls, .color-section {
+    width: 95vw;
+    max-width: 400px;
+  }
+  
+  .gradient-controls .value {
+    position: static;
+    margin-top: 0.25rem;
+    align-self: flex-end;
+  }
+}
+
+/* Prevent zoom on double tap */
+@media (max-width: 768px) {
+  canvas {
+    touch-action: none !important;
   }
 }
